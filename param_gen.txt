@@ -1,0 +1,8 @@
+//nombre de patients / observations
+nb_obs 10
+//nombre de variables
+nb_var 5
+//nombre d'actions 
+nb_actions 4
+// nombre de tops
+nb_tops 5 15 30 25 15
