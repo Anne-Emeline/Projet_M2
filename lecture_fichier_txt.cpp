@@ -71,6 +71,31 @@ vector<proba_t> ranger_pair(string one_line)
 
 // *****************************************************************************************************************************
 /*
+ Function
+ reading line from param.txt file
+ making pair of variable with its slope and duration
+ return the pair
+*/
+pair_variation_var creation_var_pair(string line)
+{
+    string event, variable, slope, duration, slope_duration;
+    pair_variation_var var_slope_dur;
+    istringstream stream(line);
+    //cout << line << endl;
+    stream >> event;
+    stream >> variable;
+    stream >> slope;
+    stream >> duration;
+    slope_duration = slope + ' ' + duration;
+    var_slope_dur.first = variable;
+    var_slope_dur.second = slope_duration;
+        
+    return var_slope_dur;
+}
+
+// *****************************************************************************************************************************
+// *****************************************************************************************************************************
+/*
  Procedure
  reading the file with general settings
  number of observations
@@ -178,8 +203,40 @@ void generer_traces(int nb_obs, std::vector<int> tab_nb_tops, std::vector<std::v
  Procedure
  
  */
-void lire_fichier_param_events()
+map_param lire_fichier_param_events()
 {
     ifstream param_events_file("/Users/Anne-Emeline/Desktop/Projet_Sin/Projet_Sinoquet/param.txt");
-    string line;
+    string line, event;
+    map_param variation_map;
+    vector<pair_variation_var> tab;
+    pair_variation_var var_slope_dur;
+    if (param_events_file)
+    {
+        while (getline(param_events_file, line))
+        {
+            if (line[0] != '/')
+            {
+                istringstream stream(line);
+                stream >> event;
+                if (variation_map.count(event))
+                {
+                    var_slope_dur = creation_var_pair(line);
+                    tab.push_back(var_slope_dur);
+                    variation_map[event] = tab;
+                } else
+                {
+                    vector<pair_variation_var> tab;
+                    var_slope_dur = creation_var_pair(line);
+                    tab.push_back(var_slope_dur);
+                    variation_map[event] = tab;
+                }
+                
+            }
+        }
+     }
+    else
+    {
+        cout << "ERROR: Impossible to open the file." << endl;
+    }
+    return variation_map;
 }

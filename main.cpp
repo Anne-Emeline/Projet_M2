@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
     int nb_obs, nb_var, nb_actions;
     vector<int> tab_nb_tops;
     vector<vector<proba_t>> vect_proba;
+    map_param map_event_variation_var;
     //TPtrAction ptr_tete_proba;
     
     lire_fichier_param_gen(&nb_obs, &nb_var, &nb_actions, &tab_nb_tops);
@@ -45,7 +46,20 @@ int main(int argc, char *argv[])
     }
     */
     
-    generer_traces(nb_obs, tab_nb_tops, vect_proba);
+    //generer_traces(nb_obs, tab_nb_tops, vect_proba);
+    
+    map_event_variation_var = lire_fichier_param_events();
+    map_param::iterator p;
+    for (p = map_event_variation_var.begin(); p != map_event_variation_var.end(); p++)
+    {
+        cout << p->first << endl;
+        for (int i=0; i<p->second.size();i++)
+        {
+            cout << p->second[i].first << " " << p->second[i].second << endl;
+            
+        }
+        //cout << p->second << endl;
+    }
 	
 
 	return 0;

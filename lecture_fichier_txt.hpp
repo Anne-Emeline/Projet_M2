@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include<string>
 #include <vector>
+#include <map>
 
 void lire_fichier_param_gen(int* adr_nb_obs, int* adr_nb_var, int* adr_nb_actions, std::vector<int>* adr_tab_nb_tops);
 
@@ -19,6 +20,10 @@ std::vector<std::vector<proba_t>> lire_fichier_proba();
 
 void generer_traces(int nb_obs, std::vector<int> tab_nb_tops, std::vector<std::vector<proba_t>> vect_proba);
 
-//void generer_trace(TPtrAction tete, int nb_obs, std::vector<int> adr_tab_nb_tops);
+using pair_variation_var = std::pair<std::string,std::string>;
+
+using map_param = std::map<std::string,std::vector<pair_variation_var>>;
+
+map_param lire_fichier_param_events();
 
 #endif /* lecture_fichier_txt_hpp */
