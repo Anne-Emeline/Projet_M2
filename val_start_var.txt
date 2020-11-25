@@ -1,0 +1,6 @@
+// variable val_min val_max
+var_1 60 120
+var_2 15 25
+var_3 30 50
+var_4 6 12
+var_5 50 75
