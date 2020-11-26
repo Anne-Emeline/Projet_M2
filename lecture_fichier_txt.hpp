@@ -36,6 +36,12 @@ using trace_t = std::pair<int, std::string>;
 
 std::vector<trace_t> lire_fichier_trace(std::string file);
 
+// *****************************************************************************************************************************
+
+using one_var_m = std::vector<float>;
+
+using all_var_m = std::map<std::string, one_var_m>;
+
 void generate_var_files(std::vector<trace_t> trace_v, map_param event_var_map, int num_patient, int nb_var, map_min_max val_start_var);
 
 

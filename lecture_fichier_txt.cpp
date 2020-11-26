@@ -237,35 +237,37 @@ vector<trace_t> lire_fichier_trace(string file)
  create var files with the number of the patient
  complete these files with a value random between the min and max of the variable in function of the number of top associate at the B achor
  */
-void start_var_file(int num_patient, int start_top, int end_top, int nb_var, map_min_max val_start_var)
+all_var_m start_var(int num_patient, int start_top, int end_top, int nb_var, map_min_max val_start_var)
 {
     map_min_max::iterator p;
+    int n = 75; //inclure nb_top_total + 1 ici
+    all_var_m map_all_var;
+    one_var_m vect_one_var(n,0);
     string variable;
     for (p = val_start_var .begin(); p != val_start_var.end(); p++)
     {
         variable = p->first;
+        /*
         string const file = "/Users/Anne-Emeline/Desktop/Projet_Sin/Projet_Sinoquet/variables/" + variable + "_" + to_string(num_patient) + ".csv";
         ofstream var_file(file.c_str());
-        if (var_file)
+         */
+
+        int begining = rand()%(p->second.second - p->second.first) + p->second.first;
+        for(int top=start_top; top<end_top; top++)
         {
-            int begining = rand()%(p->second.second - p->second.first) + p->second.first;
-            for(int top=start_top; top<end_top; top++)
-            {
-                var_file << top << ' ' << begining << endl;
-            }
+            vect_one_var[top] = begining;
         }
-        else
-        {
-            cout << "ERROR: Impossible to generate the variable file." << endl;
-        }
+        map_all_var[variable] = vect_one_var;
+
     }
+    return map_all_var;
 }
 
 // *****************************************************************************************************************************
 /*
  
  */
-float racover_last_val(string file)
+float recover_last_val(string file)
 {
     string line;
     int top;
@@ -285,7 +287,7 @@ float racover_last_val(string file)
 /*
  
  */
-void complete_var_files(int top, vector<pair_variation_var> effect_event, int num_patient, int start_top, int end_top)
+void complete_var(vector<pair_variation_var> effect_event, int num_patient, int start_top, int end_top, all_var_m map_all_var)
 {
     string variable, param_var;
     int nb_tops;
@@ -298,26 +300,16 @@ void complete_var_files(int top, vector<pair_variation_var> effect_event, int nu
         istringstream stream(param_var);
         stream >> slope;
         stream >> nb_tops;
-        string const file = "/Users/Anne-Emeline/Desktop/Projet_Sin/Projet_Sinoquet/variables/" + variable + "_" + to_string(num_patient) + ".csv";
-        ofstream var_file(file.c_str(), ios::app);
         
-        //complete_file(var_file; variable, top);
-        
-        if (var_file)
+        int top = start_top;
+        while (top < end_top)
         {
-            for (int top=start_top; top<end_top; top++)
+            for (int dur=0; dur<nb_tops; dur++)
             {
-                for (int dur=0; dur<nb_tops; dur++)
-                {
-                    last_val = racover_last_val(file);
-                    float next_val = last_val * slope;
-                    var_file << top << ' ' << next_val << endl;
-                }
+                
+                
             }
-        }
-        else
-        {
-            cout << "ERROR: Impossible to open the variable file." << endl;
+            
         }
     }
 }
@@ -330,6 +322,7 @@ void generate_var_files(vector<trace_t> trace_v, map_param event_var_map, int nu
     int top;
     string event;
     vector<pair_variation_var> effect_event;
+    all_var_m map_all_var_start, map_all_var_finish;
     for (int i=0; i< trace_v.size(); i++)
     {
         top = trace_v[i].first;
@@ -337,12 +330,24 @@ void generate_var_files(vector<trace_t> trace_v, map_param event_var_map, int nu
         
         if (event == "B")
         {
-            start_var_file(num_patient, trace_v[i].first, trace_v[i+1].first, nb_var, val_start_var);
+            map_all_var_start = start_var(num_patient, trace_v[i].first, trace_v[i+1].first, nb_var, val_start_var);
         }
         else
         {
             effect_event = event_var_map[event];
-            complete_var_files(top, effect_event, num_patient, trace_v[i].first, trace_v[i+1].first);
+            complete_var(effect_event, num_patient, trace_v[i].first, trace_v[i+1].first, map_all_var_start);
         }
     }
+    /*
+    all_var_m::iterator p;
+    string variable;
+    for (p = map_all_var .begin(); p != map_all_var.end(); p++)
+    {
+        for (int i=1; i<p->second.size(); i++)
+        {
+            cout << p->first << ' ' << i << ' ' << p->second[i] << endl;
+        }
+
+    }
+    */
 }

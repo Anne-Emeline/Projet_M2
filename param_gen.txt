@@ -3,6 +3,8 @@ nb_obs 10
 //nombre de variables
 nb_var 5
 //nombre d'actions 
-nb_actions 4
+nb_actions 13
 // nombre de tops
 nb_tops 15 20 7 20 10
+// nombre de tops total
+nb_tops_total 74
