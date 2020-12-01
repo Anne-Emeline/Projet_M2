@@ -216,6 +216,7 @@ vector<trace_t> lire_fichier_trace(string file)
                 istringstream stream(line);
                 stream >> top;
                 stream >> event;
+                event.erase(0,1);
                 one_pair.first = top;
                 one_pair.second = event;
                 the_trace.push_back(one_pair);
@@ -237,14 +238,14 @@ vector<trace_t> lire_fichier_trace(string file)
  create var files with the number of the patient
  complete these files with a value random between the min and max of the variable in function of the number of top associate at the B achor
  */
-all_var_m start_var(int num_patient, int start_top, int end_top, int nb_var, map_min_max val_start_var)
+all_var_m start_var(int start_top, int end_top, int nb_var, map_min_max val_start_var)
 {
     map_min_max::iterator p;
     int n = 75; //inclure nb_top_total + 1 ici
     all_var_m map_all_var;
     one_var_m vect_one_var(n,0);
     string variable;
-    for (p = val_start_var .begin(); p != val_start_var.end(); p++)
+    for (p = val_start_var.begin(); p != val_start_var.end(); p++)
     {
         variable = p->first;
         /*
@@ -267,32 +268,11 @@ all_var_m start_var(int num_patient, int start_top, int end_top, int nb_var, map
 /*
  
  */
-float recover_last_val(string file)
-{
-    string line;
-    int top;
-    float val=0;
-    ifstream var_file(file.c_str());
-    while (getline(var_file, line))
-    {
-        istringstream stream(line);
-        stream >> top;
-        stream >> val;
-    }
-    //cout << val << endl;
-    return val;
-}
-
-// *****************************************************************************************************************************
-/*
- 
- */
-void complete_var(vector<pair_variation_var> effect_event, int num_patient, int start_top, int end_top, all_var_m map_all_var)
+void complete_var(vector<pair_variation_var> effect_event, int start_top, int end_top, all_var_m* map_all_var_start, vector<int> tab_nb_tops)
 {
     string variable, param_var;
-    int nb_tops;
-    float slope;
-    float last_val;
+    int nb_tops = 0, top;
+    float slope = 0;
     for (int i=0; i<effect_event.size(); i++)
     {
         variable = effect_event[i].first;
@@ -300,48 +280,68 @@ void complete_var(vector<pair_variation_var> effect_event, int num_patient, int 
         istringstream stream(param_var);
         stream >> slope;
         stream >> nb_tops;
+        nb_tops = nb_tops + start_top;
         
-        int top = start_top;
-        while (top < end_top)
+        auto search = map_all_var_start->find(variable);
+        cout << "on s'occupe de : " << variable << " qui va du top " << start_top << " à " << nb_tops << endl;
+        //for (int v=1; v<search->second.size(); v++)
+        //{
+          //  cout << search->second[v] << endl;
+        //}
+        
+        
+        for(top=start_top ;top < nb_tops; top++)
         {
-            for (int dur=0; dur<nb_tops; dur++)
-            {
-                
-                
-            }
+            //cout << top << " " << search->second[top] << endl;
+            search->second[top] = search->second[top-1] * slope;
             
+            cout << "pour la variable " << variable << ", le top " << top << " est complété avec " << search->second[top-1] * slope << endl;
+            
+        }
+        for (top=nb_tops ;top < end_top; top++)
+        {
+            search->second[top] = search->second[top-1];
+            cout << "pour la variable " << variable << ", le top " << top << " est complétéavec " << search->second[top-1] << endl;
+            //cout << top << " " << search->second[top] << endl;
         }
     }
 }
+
 // *****************************************************************************************************************************
 /*
  
  */
-void generate_var_files(vector<trace_t> trace_v, map_param event_var_map, int num_patient, int nb_var, map_min_max val_start_var)
+void generate_var_files(vector<trace_t> trace_v, map_param event_var_map, int num_patient, int nb_var, map_min_max val_start_var, vector<int> tab_nb_tops)
 {
-    int top;
     string event;
     vector<pair_variation_var> effect_event;
-    all_var_m map_all_var_start, map_all_var_finish;
+    all_var_m map_all_var_start;
+
     for (int i=0; i< trace_v.size(); i++)
     {
-        top = trace_v[i].first;
         event = trace_v[i].second;
         
         if (event == "B")
         {
-            map_all_var_start = start_var(num_patient, trace_v[i].first, trace_v[i+1].first, nb_var, val_start_var);
+            map_all_var_start = start_var(trace_v[i].first, trace_v[i+1].first, nb_var, val_start_var);
         }
         else
         {
+            cout << "Nous sommes à l'venenement : " << event << endl;
             effect_event = event_var_map[event];
-            complete_var(effect_event, num_patient, trace_v[i].first, trace_v[i+1].first, map_all_var_start);
+            /*
+            for (int v=0; v<effect_event.size(); v++)
+            {
+                cout << effect_event[v].first << endl;
+            }
+            */
+            complete_var(effect_event, trace_v[i].first, trace_v[i+1].first, &map_all_var_start, tab_nb_tops);
+            
         }
     }
     /*
     all_var_m::iterator p;
-    string variable;
-    for (p = map_all_var .begin(); p != map_all_var.end(); p++)
+    for (p = map_all_var_start.begin(); p != map_all_var_start.end(); p++)
     {
         for (int i=1; i<p->second.size(); i++)
         {
@@ -350,4 +350,5 @@ void generate_var_files(vector<trace_t> trace_v, map_param event_var_map, int nu
 
     }
     */
+    
 }
