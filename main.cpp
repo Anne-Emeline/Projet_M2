@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
         }
         */
         
-        generate_var_files(one_trace, map_event_variation_var, i+1, nb_var, val_start_var, tab_nb_tops);
+        generate_var_files(one_trace, map_event_variation_var, i+1, nb_var, val_start_var);
     }
 
 	return 0;

@@ -268,7 +268,7 @@ all_var_m start_var(int start_top, int end_top, int nb_var, map_min_max val_star
 /*
  
  */
-void complete_var(vector<pair_variation_var> effect_event, int start_top, int end_top, all_var_m* map_all_var_start, vector<int> tab_nb_tops)
+void complete_var(vector<pair_variation_var> effect_event, int start_top, int end_top, all_var_m* map_all_var_start)
 {
     string variable, param_var;
     int nb_tops = 0, top;
@@ -295,15 +295,29 @@ void complete_var(vector<pair_variation_var> effect_event, int start_top, int en
             //cout << top << " " << search->second[top] << endl;
             search->second[top] = search->second[top-1] * slope;
             
-            cout << "pour la variable " << variable << ", le top " << top << " est complété avec " << search->second[top-1] * slope << endl;
+            //cout << "pour la variable " << variable << ", le top " << top << " est complété avec " << search->second[top-1] * slope << endl;
             
         }
+        /*
         for (top=nb_tops ;top < end_top; top++)
         {
             search->second[top] = search->second[top-1];
             cout << "pour la variable " << variable << ", le top " << top << " est complétéavec " << search->second[top-1] << endl;
             //cout << top << " " << search->second[top] << endl;
         }
+         */
+    }
+    // mauvaise lecture avec les pointeurs 
+    for (all_var_m::iterator p = map_all_var_start->begin(); p != map_all_var_start->end(); p++)
+    {
+        for (int i=start_top; i<end_top; i++)
+        {
+            if(p->second[i] == 0)
+            {
+                p->second[i] = p->second[i-1];
+            }
+        }
+
     }
 }
 
@@ -311,7 +325,7 @@ void complete_var(vector<pair_variation_var> effect_event, int start_top, int en
 /*
  
  */
-void generate_var_files(vector<trace_t> trace_v, map_param event_var_map, int num_patient, int nb_var, map_min_max val_start_var, vector<int> tab_nb_tops)
+void generate_var_files(vector<trace_t> trace_v, map_param event_var_map, int num_patient, int nb_var, map_min_max val_start_var)
 {
     string event;
     vector<pair_variation_var> effect_event;
@@ -327,7 +341,7 @@ void generate_var_files(vector<trace_t> trace_v, map_param event_var_map, int nu
         }
         else
         {
-            cout << "Nous sommes à l'venenement : " << event << endl;
+            //cout << "Nous sommes à l'venenement : " << event << endl;
             effect_event = event_var_map[event];
             /*
             for (int v=0; v<effect_event.size(); v++)
@@ -335,11 +349,11 @@ void generate_var_files(vector<trace_t> trace_v, map_param event_var_map, int nu
                 cout << effect_event[v].first << endl;
             }
             */
-            complete_var(effect_event, trace_v[i].first, trace_v[i+1].first, &map_all_var_start, tab_nb_tops);
+            complete_var(effect_event, trace_v[i].first, trace_v[i+1].first, &map_all_var_start);
             
         }
     }
-    /*
+    
     all_var_m::iterator p;
     for (p = map_all_var_start.begin(); p != map_all_var_start.end(); p++)
     {
@@ -349,6 +363,6 @@ void generate_var_files(vector<trace_t> trace_v, map_param event_var_map, int nu
         }
 
     }
-    */
+    
     
 }

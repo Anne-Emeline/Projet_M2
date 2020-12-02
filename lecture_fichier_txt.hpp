@@ -42,7 +42,7 @@ using one_var_m = std::vector<float>;
 
 using all_var_m = std::map<std::string, one_var_m>;
 
-void generate_var_files(std::vector<trace_t> trace_v, map_param event_var_map, int num_patient, int nb_var, map_min_max val_start_var, vector<int> tab_nb_tops);
+void generate_var_files(std::vector<trace_t> trace_v, map_param event_var_map, int num_patient, int nb_var, map_min_max val_start_var);
 
 
 
