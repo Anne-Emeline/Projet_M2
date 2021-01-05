@@ -9,7 +9,6 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <ctime>
 
 using namespace std;
 
@@ -110,46 +109,6 @@ map_min_max lire_fichier_val_start_var()
         cout << "ERROR: Impossible to open the proba file." << endl;
     }
     return the_map;
-}
-
-// *****************************************************************************************************************************
-/*
- Procedure
- using parameters saved from files, in order to create csv files (1 by patient), with trace of actions and events draw lots in function of their probability with a top associate
- */
-void generer_traces(int nb_obs, vector<int> tab_nb_tops, vector<vector<proba_t>> vect_proba)
-{
-    srand((unsigned int)time(0));
-    for (int i=0; i<1; i++)
-    {
-        string const file = "/Users/Anne-Emeline/Desktop/Projet_Sin/Projet_Sinoquet/traces/trace_patient_" + to_string(i+1) + ".csv";
-        ofstream trace_file(file.c_str());
-        
-        if (trace_file)
-        {
-            for (int i=0; i<vect_proba.size() ; i++)
-            {
-                for (int j=0; j<vect_proba[i].size() ; j++)
-                {
-                    float nb_alea = (rand() % 100+1); //random between 1 and 100
-                    if (vect_proba[i][0].second > nb_alea/100) //ancre proba > au random
-                    {
-                        trace_file << vect_proba[i][j].first << endl;
-                        float nb_alea_bis = (rand() % 100+1); //random between 1 and 100
-                        if (vect_proba[i][j].second > nb_alea_bis/100)
-                        {
-                            trace_file << vect_proba[i][j].first << endl;
-                        }
-                    }
-                    //cout << vect_proba[i][j].first << " " << vect_proba[i][j].second << endl;
-                }
-            }
-         }
-        else
-        {
-            cout << "ERROR: Impossible to open the trace_patient file." << endl;
-        }
-    }
 }
 
 // *****************************************************************************************************************************
