@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "read_files.hpp"
+#include "essais.hpp"
 
 using namespace std;
 
@@ -16,7 +17,7 @@ int main(int argc, const char * argv[]) {
     
     int nb_obs, nb_var, nb_actions, nb_tops_total;
     vector<int> tab_nb_tops;
-    segment_map donnes_patients_synth;
+    map_final donnes_patients_synth;
     
     lire_fichier_param_gen(&nb_obs, &nb_var, &nb_actions, &tab_nb_tops, &nb_tops_total);
 

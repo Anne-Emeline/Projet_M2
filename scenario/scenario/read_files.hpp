@@ -15,19 +15,19 @@
 
 void lire_fichier_param_gen(int* adr_nb_obs, int* adr_nb_var, int* adr_nb_actions, std::vector<int>* adr_tab_nb_tops, int* adr_nb_tops_total);
 
-struct segment_s
-{
-    std::vector<float> segment;
-    int total_nb_top;
-};
+using segment_s = std::pair<std::vector<float>, int>;
 
 using segments = std::vector<segment_s>;
 
-using variables_p = std::pair<std::string, segments>;
+using s_map = std::map<std::string, segments>;
 
-using segment_map = std::map<std::string, std::vector<variables_p>>;
+using map_final = std::map<std::string, s_map>;
 
-segment_map read_files(int nb_obs, int nb_var, int nb_tops_total);
+//using variables_p = std::pair<std::string, segments>;
+
+//using segment_map = std::map<std::string, std::vector<variables_p>>;
+
+map_final read_files(int nb_obs, int nb_var, int nb_tops_total);
 
 using trace_t = std::pair<int, std::string>;
 
@@ -40,7 +40,13 @@ struct tableau_var{
     std::vector<float> donnees;
     tableau_var* nxt_patient;
 };
-
 using data_map = std::map<std::string, tableau_var*>;
+
+struct tableau_trace{
+    int patient;
+    std::vector<trace_t> donnees;
+    tableau_trace* nxt_patient;
+};
+
 
 #endif /* read_files_hpp */
