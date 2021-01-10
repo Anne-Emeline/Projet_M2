@@ -46,7 +46,7 @@ map_final read_files(int nb_obs, int nb_var, int nb_tops_total)
             }
             vector<var_top_p> variables = p->second;
             
-            segments ensemble_seg;
+            segments vect_final;
             
             for(k=all_data.begin(); k!=all_data.end(); k++)
             {
@@ -81,12 +81,19 @@ map_final read_files(int nb_obs, int nb_var, int nb_tops_total)
                 seg_dur.second = the_dur;
                 ensemble_seg.push_back[seg_dur];
                 
-                final_map[event_ref][var_ref] = ensemble_seg;
+                vect_final = final_map[event_ref][var_ref];
+                if(vect_final == nullptr)
+                {
+                    vect_final = ensemble_seg;
+                }
+                vect_final.insert(vect_final.end(), ensemble_seg.begin(), ensemble_seg.end());
+                
+                final_map[event_ref][var_ref] = vect_final;
             }
 
         }
         
         tab_trace = tab_trace->nxt_patient;
     }
-        
+    return final_map;
 }
