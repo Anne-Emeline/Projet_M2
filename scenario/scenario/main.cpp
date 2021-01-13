@@ -9,11 +9,10 @@
 #include <vector>
 
 #include "read_files.hpp"
-#include "essais.hpp"
 
 using namespace std;
 
-int main(int argc, const char * argv[]) {
+int main() {
     
     int nb_obs, nb_var, nb_actions, nb_tops_total;
     vector<int> tab_nb_tops;
