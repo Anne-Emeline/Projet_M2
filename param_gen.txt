@@ -7,4 +7,4 @@ nb_actions 13
 // nombre de tops
 nb_tops 15 20 7 20 10
 // nombre de tops total
-nb_tops_total 74
+nb_tops_total 78
