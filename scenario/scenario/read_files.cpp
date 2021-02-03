@@ -16,12 +16,12 @@ using namespace std;
  Procedure
  searching for variable name in a line ofe type string
 */
-void chercher_variable(string the_line, string tne_variable, int* adr_variable)
+void chercher_variable(string the_line, string the_variable, int* adr_variable)
 {
     string word;
     istringstream stream(the_line);
     stream >> word;
-    if (word == tne_variable)
+    if (word == the_variable)
     {
         stream >> *adr_variable;
     }
@@ -175,6 +175,7 @@ event_map read_event()
  create a linked list with informations of a var file (data of a synthetics patients)
  a patient is a struct with num of the patient and a vector with value of the variable during the chirurgie
  return head of the liste
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DON'T WORK !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 */
 tableau_var* create_tab_data(string file)
 {
@@ -207,6 +208,18 @@ tableau_var* create_tab_data(string file)
             prec_node = current;
             num_patient++;
         }
+    }
+    
+    while(head != nullptr)
+    {
+        vector<float> tableau;
+        tableau = head->donnees;
+        cout << "patient : " << head->patient << endl;
+        for(int i=0; i<tableau.size(); i++)
+        {
+            cout << tableau[i] << endl;
+        }
+        head = head->nxt_patient;
     }
     
     return head;
@@ -280,6 +293,111 @@ tableau_trace* create_tab_trace(int nb_obs)
 
 // *****************************************************************************************************************************
 /*
+ Function
+ fix upper bound error in its selection in the vector
+*/
+int chose_top_plus(int top, int nb_tops_total, int i, vector<trace_t> vect)
+{
+    int top_plus;
+    if(top != nb_tops_total)
+    {
+        top_plus = vect[i+1].first; //top end event
+    }
+    else
+    {
+        top_plus = nb_tops_total+1;
+    }
+    return top_plus;
+}
+
+// *****************************************************************************************************************************
+/*
+ Function
+ if variable in data use its own real duration else use the duration = 0
+*/
+int var_in_data(int s, vector<var_top_p> variables, string the_var)
+{
+    int the_dur = 0;
+    for(int j=0; j<variables.size(); j++) //parcourir les variables présent dans data
+    {
+        if(variables[j].first == the_var)
+        {
+            the_dur = variables[j].second;
+            break;
+        }
+    }
+    return the_dur;
+}
+
+// *****************************************************************************************************************************
+/*
+ Function
+ 
+*/
+vector<var_top_p> find_var(event_map events, string event_ref)
+{
+    event_map::iterator p;
+    vector<var_top_p> variables;
+    for(p = events.begin(); p != events.end(); p++) //parcourir map key=Event, value=vector<pair<var,duration>>
+    {
+        if(p->first == event_ref )
+        {
+            variables = p->second; //récuperer vector<pair<var,duration>> associé à event
+            break;
+        }
+    }
+    return variables;
+}
+
+// *****************************************************************************************************************************
+/*
+ Function
+ search in all_data map vecto<float> associate with actual variable and patient
+*/
+vector<float> search_seg(data_map all_data, string the_var, int num_patient)
+{
+    vector<float> segment;
+    data_map::iterator k;
+    tableau_var* head_data;
+    
+    head_data = all_data.find(the_var)->second;
+    
+    while(head_data->nxt_patient != nullptr)
+    {
+        if (head_data->patient == num_patient)
+        {
+            segment = head_data->donnees;
+            break;
+        }
+        head_data = head_data->nxt_patient;
+    }
+    
+    return segment;
+}
+
+// *****************************************************************************************************************************
+/*
+ Function
+ create an ensemble struct segment_s with segment vector<float> + duration real associate to variable and patient
+*/
+segment_s create_ensemble(int top, int top_plus, vector<float> segment, int the_dur)
+{
+    vector<float> the_seg;
+    segment_s seg_dur;
+        
+    for(int v=top-1; v<top_plus-1; v++) //récupérer segment data associé à l'event et la variable
+    {
+        float one_var = segment.at(v);
+        the_seg.push_back(one_var);
+    }
+    seg_dur.first = the_seg;
+    seg_dur.second = the_dur;
+    
+    return seg_dur;
+}
+
+// *****************************************************************************************************************************
+/*
  Main Function
  
 */
@@ -288,17 +406,11 @@ map_final read_files(int nb_obs, int nb_var, int nb_tops_total)
     event_map events;
     data_map all_data;
     tableau_trace* tab_trace;
-    data_map::iterator k;
         
     events = read_event(); //map key=Event, value=vector<pair<var,duration>>
     all_data = read_data(nb_var); //map key=var, value=liste chainée num patient + vector<float>
     
     tab_trace = create_tab_trace(nb_obs); //liste chainée num patient + pair<top,action>
-    
-    //parcourir tab_trace
-    //pour chaque patient parcours trace_t
-    //recupe all_data associé
-    //recupe duration associé dans events
     
     map_final final_map;
     
@@ -311,82 +423,34 @@ map_final read_files(int nb_obs, int nb_var, int nb_tops_total)
         
         for(int i=0; i<vect.size(); i++) //parcourir le vecteur de pair (top, event) = trace pour 1 patient
         {
-            event_map::iterator p;
             vector<var_top_p> variables;
             int top = vect[i].first; //top begin event
-            int top_plus = vect[i+1].first; //top end event
-
+            
+            int top_plus = chose_top_plus(top, nb_tops_total, i, vect);
+            
             string event_ref = vect[i].second; //event
             
-            for(p = events.begin(); p != events.end(); p++) //parcourir map key=Event, value=vector<pair<var,duration>>
-            {
-                if(p->first == event_ref )
-                {
-                    variables = p->second; //récuperer vector<pair<var,duration>> associé à event
-                    break;
-                }
-            }
+            variables = find_var(events, event_ref);
             
             segments vect_final;
             
-            for(int j=0; j<variables.size(); j++)
+            for(int s=1; s<=nb_var; s++)
             {
-                vector<float> the_seg;
-                segment_s seg_dur;
-                segments ensemble_seg;
+                string the_var = "var_"+to_string(s);
+                int the_dur = var_in_data(s, variables, the_var);
                 
-                string the_var = variables[j].first;
-                int the_dur = variables[j].second;
+                vector<float> segment = search_seg(all_data, the_var, num_patient);
                 
-                for(k = all_data.begin(); k != all_data.end(); k++) //parourir map key=var, value=liste chainée num patient + vector<float>s
-                {
-                    if(k->first != the_var)
-                    {
-                        continue;
-                    }
-                    tableau_var* head_data = k->second;
-                    
-                    while(head_data->patient != num_patient)
-                    {
-                        head_data = head_data->nxt_patient;
-                    }
-                    vector<float> segment = head_data->donnees;
+                segment_s seg_dur = create_ensemble(top, top_plus, segment, the_dur);
 
-                    while (top != nb_tops_total)
-                    {
-                        for(int v=top; v<top_plus; v++)
-                        {
-                            float one_var = segment.at(v);
-                            the_seg.push_back(one_var);
-                        }
-                    }
-                    // il manque peut-être la dernière valeur
-                    float one_var = segment.at(nb_tops_total);
-                    the_seg.push_back(one_var);
-                    
-                    seg_dur.first = the_seg;
-                    seg_dur.second = the_dur;
-                    ensemble_seg.push_back(seg_dur);
-                    
-                    vect_final = final_map[event_ref][the_var];
-                    if(!final_map.count(event_ref))
-                    {
-                        s_map i_map = final_map[event_ref];
-                        if(!i_map.count(the_var))
-                        {
-                            vect_final = ensemble_seg;
-                        }
-                    }
-
-                    vect_final.insert(vect_final.end(), ensemble_seg.begin(), ensemble_seg.end());
-                    
-                    final_map[event_ref][the_var] = vect_final;
-                }
+                final_map[event_ref][the_var].push_back(seg_dur);
                 
             }
             
         }
+        tableau_trace* previous = tab_trace;
         tab_trace = tab_trace->nxt_patient;
+        free(previous);
     }
     return final_map;
 }
