@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		7148FC5E257E62E9003DD0DA /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7148FC5D257E62E9003DD0DA /* main.cpp */; };
 		7148FC67257E6A98003DD0DA /* read_files.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7148FC65257E6A98003DD0DA /* read_files.cpp */; };
+		71EBCEDE25CC53BF00E94F9E /* play_scenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 71EBCEDC25CC53BF00E94F9E /* play_scenario.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -28,6 +29,8 @@
 		7148FC5D257E62E9003DD0DA /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		7148FC65257E6A98003DD0DA /* read_files.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = read_files.cpp; sourceTree = "<group>"; };
 		7148FC66257E6A98003DD0DA /* read_files.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = read_files.hpp; sourceTree = "<group>"; };
+		71EBCEDC25CC53BF00E94F9E /* play_scenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = play_scenario.cpp; sourceTree = "<group>"; };
+		71EBCEDD25CC53BF00E94F9E /* play_scenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = play_scenario.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +66,8 @@
 				7148FC5D257E62E9003DD0DA /* main.cpp */,
 				7148FC65257E6A98003DD0DA /* read_files.cpp */,
 				7148FC66257E6A98003DD0DA /* read_files.hpp */,
+				71EBCEDC25CC53BF00E94F9E /* play_scenario.cpp */,
+				71EBCEDD25CC53BF00E94F9E /* play_scenario.hpp */,
 			);
 			path = scenario;
 			sourceTree = "<group>";
@@ -93,7 +98,7 @@
 		7148FC52257E62E8003DD0DA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1220;
+				LastUpgradeCheck = 1240;
 				TargetAttributes = {
 					7148FC59257E62E8003DD0DA = {
 						CreatedOnToolsVersion = 12.2;
@@ -124,6 +129,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7148FC5E257E62E9003DD0DA /* main.cpp in Sources */,
+				71EBCEDE25CC53BF00E94F9E /* play_scenario.cpp in Sources */,
 				7148FC67257E6A98003DD0DA /* read_files.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -245,6 +251,7 @@
 		7148FC62257E62E9003DD0DA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -253,6 +260,7 @@
 		7148FC63257E62E9003DD0DA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

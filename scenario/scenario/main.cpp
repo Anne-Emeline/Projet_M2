@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "read_files.hpp"
+#include "play_scenario.hpp"
 
 using namespace std;
 
@@ -21,6 +22,8 @@ int main() {
     lire_fichier_param_gen(&nb_obs, &nb_var, &nb_actions, &tab_nb_tops, &nb_tops_total);
 
     donnes_patients_synth = read_files(nb_obs, nb_var, nb_tops_total);
+    
+    play_scenario(donnes_patients_synth, nb_obs, nb_var, nb_tops_total);
 
     
     return 0;

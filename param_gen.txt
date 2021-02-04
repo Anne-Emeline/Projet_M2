@@ -1,5 +1,5 @@
 //nombre de patients / observations
-nb_obs 10
+nb_obs 2
 //nombre de variables
 nb_var 3
 //nombre d'actions 
