@@ -12,6 +12,7 @@
 
 using namespace std;
 
+// *****************************************************************************************************************************
 /*
  Procedure
  searching for variable name in a line ofe type string
@@ -118,7 +119,8 @@ vector<trace_t> read_trace(string file)
 
 // *****************************************************************************************************************************
 /*
- Function read file event_var and create a map with all informations from this file
+ Function
+ read file event_var and create a map with all informations from this file
  key of the map is event
  value of the map is a vector of pair of the variable on wich the event acts and the duration of this event on the variable
  return the map
@@ -176,10 +178,9 @@ event_map read_event()
  a patient is a struct with num of the patient and a vector with value of the variable during the chirurgie
  return head of the liste
 */
-tableau_var* create_tab_data(string file)
+map_var create_tab_data(string file)
 {
-    tableau_var* head = nullptr;
-    tableau_var* prec_node = nullptr;
+    map_var var;
     vector<float> vect_data;
     string line;
     int num_patient = 1;
@@ -195,22 +196,13 @@ tableau_var* create_tab_data(string file)
             {
                 vect_data.push_back(stof(str_data));
             }
-            tableau_var* current = new tableau_var;
-            current->patient = num_patient;
-            current->donnees = vect_data;
-            if(head == nullptr)
-            {
-                head = current;
-                prec_node = current;
-            }
-            prec_node->nxt_patient = current;
-            prec_node = current;
+            var[num_patient] = vect_data;
+            
             num_patient++;
         }
     }
-    prec_node->nxt_patient = nullptr;
 
-    return head;
+    return var;
 }
 
 // *****************************************************************************************************************************
@@ -222,7 +214,7 @@ tableau_var* create_tab_data(string file)
 */
 data_map read_data(int nb_var)
 {
-    tableau_var* var;
+    map_var var;
     std::vector<float> vect_data;
     data_map all_data;
     
@@ -241,35 +233,22 @@ data_map read_data(int nb_var)
 // *****************************************************************************************************************************
 /*
  Function
- create a linked list with informations of a trace file (trace of a synthetics patients)
- a patient is a struct with num of the patient and a vector with pair of top and event acts during the chirurgie
- return head of the liste
+ create a map informations of a trace file (trace of a synthetics patients)
+ the key is a patient number and the value a vector with pair of top and event acts during the chirurgie
+ return the map
 */
-tableau_trace* create_tab_trace(int nb_obs)
+map_trace create_tab_trace(int nb_obs)
 {
-    tableau_trace* head = nullptr;
-    tableau_trace* prec_node = nullptr;
+    map_trace trace_m;
         
     for (int j=1; j<=nb_obs; j++)
     {
         string const file = "/Users/Anne-Emeline/Desktop/Projet_Sin/Projet_Sinoquet/traces/trace_patient_" + to_string(j) + ".csv";
         
         vector<trace_t> the_trace = read_trace(file);
-        
-        tableau_trace* current = new tableau_trace;
-        current->patient = j;
-        current->donnees = the_trace;
-        if(head == nullptr)
-        {
-            head = current;
-            prec_node = current;
-        }
-        prec_node->nxt_patient = current;
-        prec_node = current;
-        
+        trace_m[j] = the_trace;
     }
-    prec_node->nxt_patient = nullptr;
-    return head;
+    return trace_m;
 }
 
 // *****************************************************************************************************************************
@@ -334,32 +313,6 @@ vector<var_top_p> find_var(event_map events, string event_ref)
 // *****************************************************************************************************************************
 /*
  Function
- search in all_data map vecto<float> associate with actual variable and patient
-*/
-vector<float> search_seg(data_map all_data, string the_var, int num_patient)
-{
-    vector<float> segment;
-    data_map::iterator k;
-    tableau_var* head_data;
-    
-    head_data = all_data.find(the_var)->second;
-    
-    while(head_data->nxt_patient != nullptr)
-    {
-        if (head_data->patient == num_patient)
-        {
-            segment = head_data->donnees;
-            break;
-        }
-        head_data = head_data->nxt_patient;
-    }
-    
-    return segment;
-}
-
-// *****************************************************************************************************************************
-/*
- Function
  create an ensemble struct segment_s with segment vector<float> + duration real associate to variable and patient
 */
 segment_s create_ensemble(int top, int top_plus, vector<float> segment, int the_dur)
@@ -388,19 +341,20 @@ map_final read_files(int nb_obs, int nb_var, int nb_tops_total)
 {
     event_map events;
     data_map all_data;
-    tableau_trace* tab_trace;
+    map_trace trace_m;
+    map_trace::iterator p;
         
     events = read_event(); //map key=Event, value=vector<pair<var,duration>>
-    all_data = read_data(nb_var); //map key=var, value=liste chainée num patient + vector<float>
+    all_data = read_data(nb_var); //map key=var, value= map< num patient + vector<float> >
     
-    tab_trace = create_tab_trace(nb_obs); //linked list num patient + pair<top,action>
+    trace_m = create_tab_trace(nb_obs); //linked list num patient + pair<top,action>
     
     map_final final_map;
     
-    while(tab_trace->nxt_patient != nullptr ) //browse the linked list with traces of patients
+    for(p = trace_m.begin(); p != trace_m.end(); p++) //browse the map with traces of patients
     {
-        int num_patient = tab_trace->patient;
-        vector<trace_t> vect = tab_trace->donnees;
+        int num_patient = p->first;
+        vector<trace_t> vect = p->second;
         
         for(int i=0; i<vect.size(); i++) //browse vector pair (top, event) = trace of 1 patient
         {
@@ -420,18 +374,14 @@ map_final read_files(int nb_obs, int nb_var, int nb_tops_total)
                 string the_var = "var_"+to_string(s);
                 int the_dur = var_in_data(s, variables, the_var);
                 
-                vector<float> segment = search_seg(all_data, the_var, num_patient);
+                vector<float> segment = all_data[the_var][num_patient];
                 
                 segment_s seg_dur = create_ensemble(top, top_plus, segment, the_dur);
 
                 final_map[event_ref][the_var].push_back(seg_dur);
                 
             }
-            
         }
-        tableau_trace* previous = tab_trace;
-        tab_trace = tab_trace->nxt_patient;
-        free(previous);
     }
      
     return final_map;
