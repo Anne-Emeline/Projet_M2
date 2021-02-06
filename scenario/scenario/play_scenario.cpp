@@ -9,6 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <stdio.h>
 
 using namespace std;
 
@@ -107,7 +108,7 @@ void practice_action(map_final donnes_patients_synth, int i, map_save* save, vec
         string var = "var_"+to_string(j);
         segments vect_data = donnes_patients_synth[answer][var];
         one_pair.first = answer;
-        float prec_value = (*save)[var][i];
+        float prec_value = (*save)[var][j];
         
         segment_s data = best_seg(vect_data, prec_value);
         
@@ -122,12 +123,42 @@ void practice_action(map_final donnes_patients_synth, int i, map_save* save, vec
 
 // *****************************************************************************************************************************
 /*
+ Function
+ find place in the vector of the previous value of the scenario
+*/
+int place(vector<float> prec_seg, float prec_value)
+{
+    for(int v=0; v>prec_seg.size(); v++)
+    {
+        if(prec_seg[v] == prec_value)
+        {
+            return v;
+        }
+    }
+    return int(prec_seg.size());
+}
+
+// *****************************************************************************************************************************
+/*
  Procedure
  
 */
 void continue_segment(map_final donnes_patients_synthdata, int i, map_save* save, vector<pair<string,int>>* current_event, int nb_var, map_save* last_segment)
 {
-    
+    vector<float> data_display;
+    for(int j=1; j<=nb_var; j++)
+    {
+        pair<string,int> one_pair;
+        string var = "var_"+to_string(j);
+        
+        vector<float> prec_seg = (*last_segment)[var];
+        float prec_value = (*save)[var][j];
+        int v = place(prec_seg, prec_value);
+        
+        (*save)[var].push_back(prec_seg[v+1]);
+        data_display.push_back(prec_seg[v+1]);
+    }
+    display(data_display);
 }
 
 // *****************************************************************************************************************************
@@ -171,7 +202,7 @@ void play_scenario(map_final donnes_patients_synth, int nb_obs, int nb_var, int 
             start_scen(donnes_patients_synth, nb_var, nb_obs, &save, &current_event, &last_segment);
         }
         
-        cin >> answer;
+        getline(cin, answer);
         
         int valid = wich_value(answer, donnes_patients_synth);
         
