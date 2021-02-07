@@ -25,6 +25,7 @@ void first_display(vector<string> var_name, vector<float> data_display)
         cout << var_name[i] << ' ';
     }
     cout << endl;
+    cout << 'B' << endl;
     for(int v=0; v<data_display.size(); v++)
     {
         cout << "  " <<  data_display[v] << "  ";
@@ -49,7 +50,7 @@ void display(vector<float> data_display)
 // *****************************************************************************************************************************
 /*
  Procedure
- 
+ for the begining of the scenario program randomly chooses the first value between all the data
 */
 void start_scen(map_final donnes_patients_synth, int nb_var, int nb_obs, map_save* save, vector<pair<string,int>>* current_event, map<string,vector<float>>* last_segment)
 {
@@ -96,27 +97,54 @@ segment_s best_seg(segments vect_data, float prec_value)
 
 // *****************************************************************************************************************************
 /*
+ Function
+ if a segment exist on map_final for the event chose best segment and value to displayed
+ else displayed a constant value because the event don't have effect on the variable
+*/
+float test_next(map_final donnes_patients_synth, string answer, string var, float prec_value, vector<pair<string,int>>* current_event)
+{
+    pair<string,int> one_pair;
+    segments vect_data;
+    segment_s data;
+    float add;
+    
+    if(donnes_patients_synth[answer].count(var))
+    {
+        vect_data = donnes_patients_synth[answer][var];
+        data = best_seg(vect_data, prec_value);
+        
+        one_pair.first = answer;
+        one_pair.second = data.second;
+        (*current_event).push_back(one_pair);
+        add = data.first[0];
+    }
+    else
+    {
+        add = prec_value;
+    }
+    return add;
+}
+
+// *****************************************************************************************************************************
+/*
  Procedure
- 
+ the user has made an action
+ program have to find the best value to display considering the last one
 */
 void practice_action(map_final donnes_patients_synth, int i, map_save* save, vector<pair<string,int>>* current_event, string answer, int nb_var, map_save* last_segment)
 {
     vector<float> data_display;
     for(int j=1; j<=nb_var; j++)
     {
-        pair<string,int> one_pair;
+        float add;
+        
         string var = "var_"+to_string(j);
-        segments vect_data = donnes_patients_synth[answer][var];
-        one_pair.first = answer;
-        float prec_value = (*save)[var][j];
+        float prec_value = (*save)[var][i-1];
         
-        segment_s data = best_seg(vect_data, prec_value);
+        add = test_next(donnes_patients_synth, answer, var, prec_value, current_event);
         
-        one_pair.second = data.second;
-        (*current_event).push_back(one_pair);
-        (*save)[var].push_back(data.first[0]);
-        
-        data_display.push_back(data.first[0]);
+        (*save)[var].push_back(add);
+        data_display.push_back(add);
     }
     display(data_display);
 }
@@ -152,7 +180,7 @@ void continue_segment(map_final donnes_patients_synthdata, int i, map_save* save
         string var = "var_"+to_string(j);
         
         vector<float> prec_seg = (*last_segment)[var];
-        float prec_value = (*save)[var][j];
+        float prec_value = (*save)[var][i-1];
         int v = place(prec_seg, prec_value);
         
         (*save)[var].push_back(prec_seg[v+1]);
@@ -184,8 +212,7 @@ int wich_value(string answer, map_final donnes_patients_synth)
 // *****************************************************************************************************************************
 /*
  Main Function
- create a map that contains all data
- map<event,<map<variable,<vector<pair<vector<segment_data>,real_duration>>>>>>
+ 
 */
 void play_scenario(map_final donnes_patients_synth, int nb_obs, int nb_var, int nb_tops_total)
 {
@@ -200,6 +227,7 @@ void play_scenario(map_final donnes_patients_synth, int nb_obs, int nb_var, int 
         if(i==0)
         {
             start_scen(donnes_patients_synth, nb_var, nb_obs, &save, &current_event, &last_segment);
+            continue;
         }
         
         getline(cin, answer);
