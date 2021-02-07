@@ -15,7 +15,7 @@ using namespace std;
 // *****************************************************************************************************************************
 /*
  Procedure
- searching for variable name in a line ofe type string
+ searching for variable name in a line of type string
 */
 void chercher_variable(string the_line, string the_variable, int* adr_variable)
 {
@@ -201,7 +201,6 @@ map_var create_tab_data(string file)
             num_patient++;
         }
     }
-
     return var;
 }
 
@@ -226,7 +225,6 @@ data_map read_data(int nb_var)
         string var_name = "var_" + to_string(i);
         all_data[var_name] = var;
     }
-    
     return all_data;
 }
 
@@ -333,6 +331,49 @@ segment_s create_ensemble(int top, int top_plus, vector<float> segment, int the_
 
 // *****************************************************************************************************************************
 /*
+ Procedure
+ 
+*/
+void complete_map(int nb_var, vector<var_top_p> variables, int num_patient, int top, int top_plus, data_map all_data, map_final* final_map, string event_ref)
+{
+    for(int s=1; s<=nb_var; s++)
+    {
+        string the_var = "var_"+to_string(s);
+        int the_dur = var_in_data(s, variables, the_var);
+        
+        vector<float> segment = all_data[the_var][num_patient];
+        
+        segment_s seg_dur = create_ensemble(top, top_plus, segment, the_dur);
+
+        (*final_map)[event_ref][the_var].push_back(seg_dur);
+        
+    }
+}
+
+// *****************************************************************************************************************************
+/*
+ Procedure
+ 
+*/
+void read_vect(vector<trace_t> vect, int num_patient, event_map events, data_map all_data, map_final* final_map, int nb_var, int nb_tops_total)
+{
+    for(int i=0; i<vect.size(); i++) //browse vector pair (top, event) = trace of 1 patient
+    {
+        vector<var_top_p> variables;
+        int top = vect[i].first; //top begin event
+        
+        int top_plus = chose_top_plus(top, nb_tops_total, i, vect);
+        
+        string event_ref = vect[i].second; //event
+        
+        variables = find_var(events, event_ref);
+        
+        complete_map(nb_var, variables, num_patient, top, top_plus, all_data, final_map, event_ref);
+    }
+}
+
+// *****************************************************************************************************************************
+/*
  Main Function
  create a map that contains all data
  map<event,<map<variable,<vector<pair<vector<segment_data>,real_duration>>>>>>
@@ -356,33 +397,7 @@ map_final read_files(int nb_obs, int nb_var, int nb_tops_total)
         int num_patient = p->first;
         vector<trace_t> vect = p->second;
         
-        for(int i=0; i<vect.size(); i++) //browse vector pair (top, event) = trace of 1 patient
-        {
-            vector<var_top_p> variables;
-            int top = vect[i].first; //top begin event
-            
-            int top_plus = chose_top_plus(top, nb_tops_total, i, vect);
-            
-            string event_ref = vect[i].second; //event
-            
-            variables = find_var(events, event_ref);
-            
-            segments vect_final;
-            
-            for(int s=1; s<=nb_var; s++)
-            {
-                string the_var = "var_"+to_string(s);
-                int the_dur = var_in_data(s, variables, the_var);
-                
-                vector<float> segment = all_data[the_var][num_patient];
-                
-                segment_s seg_dur = create_ensemble(top, top_plus, segment, the_dur);
-
-                final_map[event_ref][the_var].push_back(seg_dur);
-                
-            }
-        }
+        read_vect(vect, num_patient, events, all_data, &final_map, nb_var, nb_tops_total);
     }
-     
     return final_map;
 }
