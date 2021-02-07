@@ -332,14 +332,17 @@ segment_s create_ensemble(int top, int top_plus, vector<float> segment, int the_
 // *****************************************************************************************************************************
 /*
  Procedure
- 
+ for one variable find the real duration of the variable in data
+ create a vector<float> with segment for one event in data
+ gathers information in vector<pair<vector<float>,int>>
+ save information in the map final
 */
 void complete_map(int nb_var, vector<var_top_p> variables, int num_patient, int top, int top_plus, data_map all_data, map_final* final_map, string event_ref)
 {
-    for(int s=1; s<=nb_var; s++)
+    for(int i=1; i<=nb_var; i++)
     {
-        string the_var = "var_"+to_string(s);
-        int the_dur = var_in_data(s, variables, the_var);
+        string the_var = "var_"+to_string(i);
+        int the_dur = var_in_data(i, variables, the_var);
         
         vector<float> segment = all_data[the_var][num_patient];
         
@@ -353,7 +356,9 @@ void complete_map(int nb_var, vector<var_top_p> variables, int num_patient, int 
 // *****************************************************************************************************************************
 /*
  Procedure
- 
+ for one trace of patient find duration of action (top and top_plus)
+ find vector with variables and duration associate to the event
+ then complete the map
 */
 void read_vect(vector<trace_t> vect, int num_patient, event_map events, data_map all_data, map_final* final_map, int nb_var, int nb_tops_total)
 {
