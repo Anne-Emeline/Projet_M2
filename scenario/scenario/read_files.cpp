@@ -85,6 +85,60 @@ void lire_fichier_param_gen(int* adr_nb_obs, int* adr_nb_var, int* adr_nb_action
 }
 
 // *****************************************************************************************************************************
+// ******************************************* lire_fichier_proba **************************************************************
+// *****************************************************************************************************************************
+/*
+ Function
+ reading line from proba.txt file, saving action and its probability associate in a paire
+ one line corresponding 1 main Action and Events associate
+ all the elements of a row are saved in a vector
+ return the vector
+*/
+void ranger_pair(string one_line, vector<proba_t>* proba_v)
+{
+    string word, probastr;
+    proba_t one_pair;
+    
+    istringstream stream(one_line);
+    while (stream >> word)
+    {
+        stream >> probastr;
+        one_pair.first = word;
+        one_pair.second = stof(probastr);
+        (*proba_v).push_back(one_pair);
+    }
+}
+
+// *****************************************************************************************************************************
+/*
+ Function
+ reading file with Action / Events and their probability
+ returns a vector which contains vectors containing an action associated with its events and their probabilities
+ */
+vector<proba_t> lire_fichier_proba()
+{
+    ifstream proba_file("/Users/Anne-Emeline/Desktop/Projet_Sin/Projet_Sinoquet/proba.txt");
+    string line;
+    vector<proba_t> proba_v;
+
+    if (proba_file)
+    {
+        while (getline(proba_file, line))
+        {
+            if (line[0] != '/')
+            {
+                ranger_pair(line, &proba_v);
+            }
+        }
+    }
+    else
+    {
+        cout << "ERROR: Impossible to open the proba file." << endl;
+    }
+    return proba_v;
+}
+
+// *****************************************************************************************************************************
 // ************************************************** read_files ***************************************************************
 // *****************************************************************************************************************************
 /*
@@ -218,7 +272,7 @@ map_var create_tab_data(string file)
 data_map read_data(int nb_var)
 {
     map_var var;
-    std::vector<float> vect_data;
+    vector<float> vect_data;
     data_map all_data;
     
     for (int i=1; i<=nb_var; i++)

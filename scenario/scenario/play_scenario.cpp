@@ -153,17 +153,19 @@ void practice_action(map_final donnes_patients_synth, int i, map_save* save, vec
 /*
  Function
  find place in the vector of the previous value of the scenario
+ if the next value is the end of the vector return last value display
 */
-int place(vector<float> prec_seg, float prec_value)
+float place(vector<float> prec_seg, float prec_value)
 {
-    for(int v=0; v>prec_seg.size(); v++)
+    vector<float>::iterator it;
+    for(it=prec_seg.begin(); it<prec_seg.end(); it++)
     {
-        if(prec_seg[v] == prec_value)
+        if(*it == prec_value && it+1 != prec_seg.end())
         {
-            return v;
+            return *it+1;
         }
     }
-    return int(prec_seg.size());
+    return prec_value;
 }
 
 // *****************************************************************************************************************************
@@ -181,10 +183,10 @@ void continue_segment(map_final donnes_patients_synthdata, int i, map_save* save
         
         vector<float> prec_seg = (*last_segment)[var];
         float prec_value = (*save)[var][i-1];
-        int v = place(prec_seg, prec_value);
+        float v = place(prec_seg, prec_value);
         
-        (*save)[var].push_back(prec_seg[v+1]);
-        data_display.push_back(prec_seg[v+1]);
+        (*save)[var].push_back(v);
+        data_display.push_back(v);
     }
     display(data_display);
 }
@@ -211,10 +213,20 @@ int wich_value(string answer, map_final donnes_patients_synth)
 
 // *****************************************************************************************************************************
 /*
+ Function
+ 
+*/
+bool chronology()
+{
+    
+}
+
+// *****************************************************************************************************************************
+/*
  Main Function
  
 */
-void play_scenario(map_final donnes_patients_synth, int nb_obs, int nb_var, int nb_tops_total)
+void play_scenario(map_final donnes_patients_synth, int nb_obs, int nb_var, int nb_tops_total, vector<proba_t> vect_proba)
 {
     srand((unsigned int)time(0));
     string answer;
@@ -244,4 +256,6 @@ void play_scenario(map_final donnes_patients_synth, int nb_obs, int nb_var, int 
                 break;
         }
     }
+    
+    cout << "End of scenario" << endl;
 }
