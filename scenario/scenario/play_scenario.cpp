@@ -115,7 +115,7 @@ float random_float(float prec_value)
  if a segment exist on map_final for the event chose best segment and value to displayed
  else displayed a constant value because the event don't have effect on the variable
 */
-float test_next(map_final donnes_patients_synth, string answer, string var, float prec_value, vector<pair<string,int>>* current_event)
+float test_next(map_final donnes_patients_synth, string answer, string var, float prec_value, vector<pair<string,int>>* current_event, map_save* last_segment)
 {
     pair<string,int> one_pair;
     segments vect_data;
@@ -131,6 +131,8 @@ float test_next(map_final donnes_patients_synth, string answer, string var, floa
         one_pair.second = data.second;
         (*current_event).push_back(one_pair);
         add = data.first[0];
+        //(*last_segment).clear();
+        (*last_segment)[var] = data.first;
     }
     else
     {
@@ -155,7 +157,7 @@ void practice_action(map_final donnes_patients_synth, int i, map_save* save, vec
         string var = "var_"+to_string(j);
         float prec_value = (*save)[var][i-1];
         
-        add = test_next(donnes_patients_synth, answer, var, prec_value, current_event);
+        add = test_next(donnes_patients_synth, answer, var, prec_value, current_event, last_segment);
         
         (*save)[var].push_back(add);
         data_display.push_back(add);
@@ -174,7 +176,7 @@ float place(vector<float> prec_seg, float prec_value)
     vector<float>::iterator it;
     for(it=prec_seg.begin(); it<prec_seg.end(); it++)
     {
-        if(*it == prec_value && it+1 != prec_seg.end())
+        if(*it == prec_value && it+1 < prec_seg.end())
         {
             return *it+1;
         }
@@ -274,6 +276,34 @@ int wich_value(string answer, map_final donnes_patients_synth, vector<proba_t>* 
 
 // *****************************************************************************************************************************
 /*
+ Procedure
+ save the scenario in a csv file
+*/
+void save_in_file(map_save save, int nb_tops_total)
+{
+    ofstream myfile;
+    map_save::iterator p;
+    myfile.open ("/Users/Anne-Emeline/Desktop/Projet_Sin/Projet_Sinoquet/resultat/scenario.csv");
+    myfile << "Top";
+    for (int j=1; j<nb_tops_total+1; j++)
+    {
+        myfile << ',' << j;
+    }
+    myfile << endl;
+    for(p=save.begin(); p!=save.end(); p++)
+    {
+        myfile << p->first << ',';
+        for(int i=0; i<(p->second).size(); i++)
+        {
+            myfile << p->second[i] << ',';
+        }
+        myfile << endl;
+    }
+    myfile.close();
+}
+
+// *****************************************************************************************************************************
+/*
  Main Function
  
 */
@@ -295,6 +325,11 @@ void play_scenario(map_final donnes_patients_synth, int nb_obs, int nb_var, int 
         
         getline(cin, answer);
         
+        if(answer == "En")
+        {
+            break;
+        }
+        
         int valid = wich_value(answer, donnes_patients_synth, &vect_proba);
         
         switch (valid) {
@@ -313,5 +348,6 @@ void play_scenario(map_final donnes_patients_synth, int nb_obs, int nb_var, int 
         }
     }
     
+    save_in_file(save, nb_tops_total);
     cout << "End of scenario" << endl;
 }
