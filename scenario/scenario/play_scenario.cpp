@@ -131,7 +131,7 @@ float test_next(map_final donnes_patients_synth, string answer, string var, floa
         one_pair.second = data.second;
         (*current_event).push_back(one_pair);
         add = data.first[0];
-        //(*last_segment).clear();
+        data.first.erase(data.first.begin());
         (*last_segment)[var] = data.first;
     }
     else
@@ -150,6 +150,7 @@ float test_next(map_final donnes_patients_synth, string answer, string var, floa
 void practice_action(map_final donnes_patients_synth, int i, map_save* save, vector<pair<string,int>>* current_event, string answer, int nb_var, map_save* last_segment)
 {
     vector<float> data_display;
+    (*last_segment).clear();
     for(int j=1; j<=nb_var; j++)
     {
         float add;
@@ -176,9 +177,10 @@ float place(vector<float> prec_seg, float prec_value)
     vector<float>::iterator it;
     for(it=prec_seg.begin(); it<prec_seg.end(); it++)
     {
+        //cout << *it << endl;
         if(*it == prec_value && it+1 < prec_seg.end())
         {
-            return *it+1;
+            return *(it+1);
         }
     }
     return random_float(prec_value);
@@ -199,6 +201,10 @@ void continue_segment(map_final donnes_patients_synthdata, int i, map_save* save
         string var = "var_"+to_string(j);
         
         vector<float> prec_seg = (*last_segment)[var];
+        if((*last_segment)[var].size() > 0)
+        {
+            (*last_segment)[var].erase((*last_segment)[var].begin());
+        }
         float prec_value = (*save)[var][i-1];
         float v = place(prec_seg, prec_value);
         
@@ -305,7 +311,7 @@ void save_in_file(map_save save, int nb_tops_total)
 // *****************************************************************************************************************************
 /*
  Main Function
- 
+ play the scenario in function of user's actions 
 */
 void play_scenario(map_final donnes_patients_synth, int nb_obs, int nb_var, int nb_tops_total, vector<proba_t> vect_proba)
 {
