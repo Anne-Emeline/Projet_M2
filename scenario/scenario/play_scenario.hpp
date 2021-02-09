@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include "read_files.hpp"
 
-void play_scenario(map_final donnes_patients_synth, int nb_obs, int nb_var, int nb_tops_total);
+void play_scenario(map_final donnes_patients_synth, int nb_obs, int nb_var, int nb_tops_total, std::vector<proba_t> vect_proba);
 
 using map_save = std::map<std::string, std::vector<float>>;
 

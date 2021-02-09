@@ -98,6 +98,20 @@ segment_s best_seg(segments vect_data, float prec_value)
 // *****************************************************************************************************************************
 /*
  Function
+ create a random float +/- equal to the precedent value
+ add noise in the scenario
+*/
+float random_float(float prec_value)
+{
+    int born_m = int(prec_value-2);
+    float dec = float(rand()%101)/100;
+    int entier = rand()%5 + born_m;
+    return entier+dec;
+}
+
+// *****************************************************************************************************************************
+/*
+ Function
  if a segment exist on map_final for the event chose best segment and value to displayed
  else displayed a constant value because the event don't have effect on the variable
 */
@@ -120,7 +134,7 @@ float test_next(map_final donnes_patients_synth, string answer, string var, floa
     }
     else
     {
-        add = prec_value;
+        add = random_float(prec_value);
     }
     return add;
 }
@@ -165,13 +179,14 @@ float place(vector<float> prec_seg, float prec_value)
             return *it+1;
         }
     }
-    return prec_value;
+    return random_float(prec_value);
 }
 
 // *****************************************************************************************************************************
 /*
  Procedure
- 
+ user doesn't make action or make action wich doesn't exist
+ continue scenario with the rest of the previous segment or a more or less constant value
 */
 void continue_segment(map_final donnes_patients_synthdata, int i, map_save* save, vector<pair<string,int>>* current_event, int nb_var, map_save* last_segment)
 {
@@ -194,13 +209,43 @@ void continue_segment(map_final donnes_patients_synthdata, int i, map_save* save
 // *****************************************************************************************************************************
 /*
  Function
- does the user's answer is a real event
- return 1 if yes and 2 if no
+ delete all actions before the last user action
 */
-int wich_value(string answer, map_final donnes_patients_synth)
+void erase_elements(vector<proba_t>* vect_proba, int i)
+{
+    for(int j=0; j<=i; j++)
+    {
+        (*vect_proba).erase((*vect_proba).begin());
+    }
+}
+
+// *****************************************************************************************************************************
+/*
+ Function
+ if the user's action isn't in the vector of action that mean this action isn't chronologically possible
+*/
+bool chronology(string answer, vector<proba_t>* vect_proba)
+{
+    for(int i=0; i<(*vect_proba).size(); i++)
+    {
+        if((*vect_proba)[i].first == answer)
+        {
+            erase_elements(vect_proba, i);
+            return true;
+        }
+    }
+    return false;
+}
+
+// *****************************************************************************************************************************
+/*
+ Function
+ check if the user's action is chronologically possible
+*/
+int test_chron(string answer, vector<proba_t>* vect_proba)
 {
     int valid;
-    if(donnes_patients_synth.count(answer))
+    if(chronology(answer, vect_proba))
     {
         valid = 1;
     }
@@ -214,11 +259,17 @@ int wich_value(string answer, map_final donnes_patients_synth)
 // *****************************************************************************************************************************
 /*
  Function
- 
+ does the user's answer is a real event
+ return 1 if yes and 2 if no
 */
-bool chronology()
+int wich_value(string answer, map_final donnes_patients_synth, vector<proba_t>* vect_proba)
 {
-    
+    int valid = 0;
+    if(donnes_patients_synth.count(answer))
+    {
+        valid = test_chron(answer, vect_proba);
+    }
+    return valid;
 }
 
 // *****************************************************************************************************************************
@@ -244,11 +295,16 @@ void play_scenario(map_final donnes_patients_synth, int nb_obs, int nb_var, int 
         
         getline(cin, answer);
         
-        int valid = wich_value(answer, donnes_patients_synth);
+        int valid = wich_value(answer, donnes_patients_synth, &vect_proba);
         
         switch (valid) {
             case 1:
                 practice_action(donnes_patients_synth, i, &save, &current_event, answer, nb_var, &last_segment);
+                break;
+                
+            case 2:
+                cout << "Invalid action" << endl;
+                i--;
                 break;
                 
             default:

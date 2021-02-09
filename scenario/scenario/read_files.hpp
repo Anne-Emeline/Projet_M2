@@ -13,9 +13,7 @@
 #include <string>
 #include <map>
 
-using proba_t = std::pair<std::string, float>;
-
-void lire_fichier_param_gen(int* adr_nb_obs, int* adr_nb_var, int* adr_nb_actions, std::vector<int>* adr_tab_nb_tops, int* adr_nb_tops_total, std::vector<proba_t> vect_proba);
+void lire_fichier_param_gen(int* adr_nb_obs, int* adr_nb_var, int* adr_nb_actions, std::vector<int>* adr_tab_nb_tops, int* adr_nb_tops_total);
 
 using segment_s = std::pair<std::vector<float>, int>;
 
@@ -24,6 +22,8 @@ using segments = std::vector<segment_s>;
 using s_map = std::map<std::string, segments>;
 
 using map_final = std::map<std::string, s_map>;
+
+using proba_t = std::pair<std::string, float>;
 
 std::vector<proba_t> lire_fichier_proba();
 
