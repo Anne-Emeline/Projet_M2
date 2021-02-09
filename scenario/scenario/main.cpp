@@ -28,6 +28,5 @@ int main() {
     
     play_scenario(donnes_patients_synth, nb_obs, nb_var, nb_tops_total, vect_proba);
 
-    
     return 0;
 }

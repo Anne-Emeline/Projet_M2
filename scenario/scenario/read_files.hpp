@@ -35,9 +35,7 @@ using var_top_p = std::pair<std::string, int>;
 
 using event_map = std::map<std::string, std::vector<var_top_p>>;
 
-using map_var = std::map<int, std::vector<float>>;
-
-using data_map = std::map<std::string, map_var>;
+using data_map = std::map<std::string, std::vector<std::pair<int, std::vector<float>>>>;
 
 using map_trace = std::map<int, std::vector<trace_t>>;
 

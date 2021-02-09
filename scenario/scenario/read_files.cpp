@@ -232,15 +232,14 @@ event_map read_event()
 // *****************************************************************************************************************************
 /*
  Function
- create a linked list with informations of a var file (data of a synthetics patients)
- a patient is a struct with num of the patient and a vector with value of the variable during the chirurgie
- return head of the liste
+ create a map with informations of a var file (data of a synthetics patients)
+  all_data --> map<var, vector< pair<num_patient, vector<float> > > > >
 */
-map_var create_tab_data(string file)
+void create_map_data(string file, string var, data_map* all_data)
 {
-    map_var var;
     vector<float> vect_data;
     string line;
+    pair<int, vector<float>> one_pair;
     int num_patient = 1;
     ifstream var_file(file.c_str());
     
@@ -254,12 +253,14 @@ map_var create_tab_data(string file)
             {
                 vect_data.push_back(stof(str_data));
             }
-            var[num_patient] = vect_data;
+            one_pair.first = num_patient;
+            one_pair.second = vect_data;
+            
+            (*all_data)[var].push_back(one_pair);
             
             num_patient++;
         }
     }
-    return var;
 }
 
 // *****************************************************************************************************************************
@@ -267,11 +268,10 @@ map_var create_tab_data(string file)
  Function
  read var file and store informations in a map
  key of the map is the var
- value of the map is the linked list associate
+ value of the map is a pair of the patient's number and the vector with values from the file var
 */
 data_map read_data(int nb_var)
 {
-    map_var var;
     vector<float> vect_data;
     data_map all_data;
     
@@ -279,9 +279,8 @@ data_map read_data(int nb_var)
     {
         string const file = "/Users/Anne-Emeline/Desktop/Projet_Sin/Projet_Sinoquet/variables/var_" + to_string(i) + ".csv";
         
-        var = create_tab_data(file);
         string var_name = "var_" + to_string(i);
-        all_data[var_name] = var;
+        create_map_data(file, var_name, &all_data);
     }
     return all_data;
 }
@@ -344,6 +343,25 @@ int var_in_data(int s, vector<var_top_p> variables, string the_var)
     }
     return the_dur;
 }
+// *****************************************************************************************************************************
+/*
+ Function
+ find the segment associate at the patient and the variable
+*/
+vector<float> find_segment(data_map all_data, string the_var, int num_patient)
+{
+    vector<pair<int, vector<float>>> vect = all_data[the_var];
+    vector<float> segment;
+        
+    for(int j=0; j<vect.size(); j++)
+    {
+        if(vect[j].first == num_patient)
+        {
+            segment = vect[j].second;
+        }
+    }
+    return segment;
+}
 
 // *****************************************************************************************************************************
 /*
@@ -381,6 +399,7 @@ segment_s create_ensemble(int top, int top_plus, vector<float> segment, int the_
         float one_var = segment.at(v);
         the_seg.push_back(one_var);
     }
+    
     seg_dur.first = the_seg;
     seg_dur.second = the_dur;
     
@@ -402,9 +421,16 @@ void complete_map(int nb_var, vector<var_top_p> variables, int num_patient, int 
         string the_var = "var_"+to_string(i);
         int the_dur = var_in_data(i, variables, the_var);
         
-        vector<float> segment = all_data[the_var][num_patient];
+        vector<float> segment = find_segment(all_data, the_var, num_patient);
         
         segment_s seg_dur = create_ensemble(top, top_plus, segment, the_dur);
+        
+        cout << "patient : " << i << " variable : " << the_var << endl;
+        
+        for(int v=0; v<seg_dur.first.size(); v++)
+        {
+            cout << " valeur : " << seg_dur.first[v] << endl;
+        }
 
         (*final_map)[event_ref][the_var].push_back(seg_dur);
         
@@ -451,7 +477,7 @@ map_final read_files(int nb_obs, int nb_var, int nb_tops_total)
     events = read_event(); //map key=Event, value=vector<pair<var,duration>>
     all_data = read_data(nb_var); //map key=var, value= map< num patient + vector<float> >
     
-    trace_m = create_tab_trace(nb_obs); //linked list num patient + pair<top,action>
+    trace_m = create_tab_trace(nb_obs); //map<num_patient, vector<pair<top, action>>>
     
     map_final final_map;
     
