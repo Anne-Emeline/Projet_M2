@@ -424,13 +424,6 @@ void complete_map(int nb_var, vector<var_top_p> variables, int num_patient, int 
         vector<float> segment = find_segment(all_data, the_var, num_patient);
         
         segment_s seg_dur = create_ensemble(top, top_plus, segment, the_dur);
-        
-        cout << "patient : " << i << " variable : " << the_var << endl;
-        
-        for(int v=0; v<seg_dur.first.size(); v++)
-        {
-            cout << " valeur : " << seg_dur.first[v] << endl;
-        }
 
         (*final_map)[event_ref][the_var].push_back(seg_dur);
         
