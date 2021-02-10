@@ -62,7 +62,6 @@ void start_scen(map_final donnes_patients_synth, int nb_var, int nb_obs, map_sav
         int num = rand()%nb_obs;
         string var = "var_"+to_string(i);
         segment_s data = donnes_patients_synth["B"][var][num];
-        
         (*last_segment)[var] = data.first;
         
         one_pair.first = "B";
@@ -131,7 +130,6 @@ float test_next(map_final donnes_patients_synth, string answer, string var, floa
         one_pair.second = data.second;
         (*current_event).push_back(one_pair);
         add = data.first[0];
-        data.first.erase(data.first.begin());
         (*last_segment)[var] = data.first;
     }
     else
