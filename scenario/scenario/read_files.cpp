@@ -13,13 +13,13 @@
 using namespace std;
 
 // *****************************************************************************************************************************
-// ********************************************** lire_fichier_param_gen *******************************************************
+// ********************************************** read_param_file **************************************************************
 // *****************************************************************************************************************************
 /*
  Procedure
  searching for variable name in a line of type string
 */
-void chercher_variable(string the_line, string the_variable, int* adr_variable)
+void searching_var(string the_line, string the_variable, int* adr_variable)
 {
     string word;
     istringstream stream(the_line);
@@ -35,7 +35,7 @@ void chercher_variable(string the_line, string the_variable, int* adr_variable)
  Procedure
  reading the string type line and save all the tops in a vector (reading variable nb_tops)
 */
-void combien_de_tops(string the_line, string the_variable, vector<int>* adr_tab_nb_tops)
+void finding_tops(string the_line, string the_variable, vector<int>* adr_tab_nb_tops)
 {
     string word;
     int val;
@@ -59,7 +59,7 @@ void combien_de_tops(string the_line, string the_variable, vector<int>* adr_tab_
  number of actions
  vector with actions / events associate with their probability
 */
-void lire_fichier_param_gen(int* adr_nb_obs, int* adr_nb_var, int* adr_nb_actions, vector<int>* adr_tab_nb_tops, int* adr_nb_tops_total)
+void read_param_file(int* adr_nb_obs, int* adr_nb_var, int* adr_nb_actions, vector<int>* adr_tab_nb_tops, int* adr_nb_tops_total)
 {
     ifstream param_file("/Users/Anne-Emeline/Desktop/Projet_Sin/Projet_Sinoquet/param_gen.txt");
 
@@ -70,11 +70,11 @@ void lire_fichier_param_gen(int* adr_nb_obs, int* adr_nb_var, int* adr_nb_action
         {
             if (line[0] != '/')
             {
-                chercher_variable(line, "nb_obs", adr_nb_obs );
-                chercher_variable(line, "nb_var", adr_nb_var);
-                chercher_variable(line, "nb_actions", adr_nb_actions);
-                combien_de_tops(line, "nb_tops", adr_tab_nb_tops);
-                chercher_variable(line, "nb_tops_total", adr_nb_tops_total);
+                searching_var(line, "nb_obs", adr_nb_obs );
+                searching_var(line, "nb_var", adr_nb_var);
+                searching_var(line, "nb_actions", adr_nb_actions);
+                finding_tops(line, "nb_tops", adr_tab_nb_tops);
+                searching_var(line, "nb_tops_total", adr_nb_tops_total);
             }
         }
     }
@@ -85,7 +85,7 @@ void lire_fichier_param_gen(int* adr_nb_obs, int* adr_nb_var, int* adr_nb_action
 }
 
 // *****************************************************************************************************************************
-// ******************************************* lire_fichier_proba **************************************************************
+// ************************************************ read_proba ****************************************************************
 // *****************************************************************************************************************************
 /*
  Function
@@ -94,7 +94,7 @@ void lire_fichier_param_gen(int* adr_nb_obs, int* adr_nb_var, int* adr_nb_action
  all the elements of a row are saved in a vector
  return the vector
 */
-void ranger_pair(string one_line, vector<proba_t>* proba_v)
+void tidy_pair(string one_line, vector<proba_t>* proba_v)
 {
     string word, probastr;
     proba_t one_pair;
@@ -115,7 +115,7 @@ void ranger_pair(string one_line, vector<proba_t>* proba_v)
  reading file with Action / Events and their probability
  returns a vector which contains vectors containing an action associated with its events and their probabilities
  */
-vector<proba_t> lire_fichier_proba()
+vector<proba_t> read_proba()
 {
     ifstream proba_file("/Users/Anne-Emeline/Desktop/Projet_Sin/Projet_Sinoquet/proba.txt");
     string line;
@@ -127,7 +127,7 @@ vector<proba_t> lire_fichier_proba()
         {
             if (line[0] != '/')
             {
-                ranger_pair(line, &proba_v);
+                tidy_pair(line, &proba_v);
             }
         }
     }
@@ -460,7 +460,7 @@ void read_vect(vector<trace_t> vect, int num_patient, event_map events, data_map
  create a map that contains all data
  map<event,<map<variable,<vector<pair<vector<segment_data>,real_duration>>>>>>
 */
-map_final read_files(int nb_obs, int nb_var, int nb_tops_total)
+map_final generate_map(int nb_obs, int nb_var, int nb_tops_total)
 {
     event_map events;
     data_map all_data;

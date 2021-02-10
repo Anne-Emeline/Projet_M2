@@ -50,7 +50,8 @@ void display(vector<float> data_display)
 // *****************************************************************************************************************************
 /*
  Procedure
- for the begining of the scenario program randomly chooses the first value between all the data
+ for the begining of the scenario program randomly chooses a patient for one action and one variable
+ keep the first value of the vector for the scenario and keep the vector for the next user action
 */
 void start_scen(map_final donnes_patients_synth, int nb_var, int nb_obs, map_save* save, vector<pair<string,int>>* current_event, map<string,vector<float>>* last_segment)
 {
@@ -100,7 +101,7 @@ segment_s best_seg(segments vect_data, float prec_value)
  create a random float +/- equal to the precedent value
  add noise in the scenario
 */
-float random_float(float prec_value)
+float random_float_in_range(float prec_value)
 {
     int born_m = int(prec_value-2);
     float dec = float(rand()%101)/100;
@@ -111,22 +112,22 @@ float random_float(float prec_value)
 // *****************************************************************************************************************************
 /*
  Function
- if a segment exist on map_final for the event chose best segment and value to displayed
- else displayed a constant value because the event don't have effect on the variable
+ if a segment exist on map_final for the event, chose best segment and value to displayed
+ else displayed a random value +/- equivalent to the last value, because the event doesn't have effect on the variable
 */
-float test_next(map_final donnes_patients_synth, string answer, string var, float prec_value, vector<pair<string,int>>* current_event, map_save* last_segment)
+float find_next_seg(map_final donnes_patients_synth, string event, string var, float prec_value, vector<pair<string,int>>* current_event, map_save* last_segment)
 {
     pair<string,int> one_pair;
     segments vect_data;
     segment_s data;
     float add;
     
-    if(donnes_patients_synth[answer].count(var))
+    if(donnes_patients_synth[event].count(var))
     {
-        vect_data = donnes_patients_synth[answer][var];
+        vect_data = donnes_patients_synth[event][var];
         data = best_seg(vect_data, prec_value);
         
-        one_pair.first = answer;
+        one_pair.first = event;
         one_pair.second = data.second;
         (*current_event).push_back(one_pair);
         add = data.first[0];
@@ -134,7 +135,7 @@ float test_next(map_final donnes_patients_synth, string answer, string var, floa
     }
     else
     {
-        add = random_float(prec_value);
+        add = random_float_in_range(prec_value);
     }
     return add;
 }
@@ -142,10 +143,10 @@ float test_next(map_final donnes_patients_synth, string answer, string var, floa
 // *****************************************************************************************************************************
 /*
  Procedure
- the user has made an action
- program have to find the best value to display considering the last one
+ user make an action
+ program find the best value to display considering the last one
 */
-void practice_action(map_final donnes_patients_synth, int i, map_save* save, vector<pair<string,int>>* current_event, string answer, int nb_var, map_save* last_segment)
+void practice_action(map_final donnes_patients_synth, int i, map_save* save, vector<pair<string,int>>* current_event, string event, int nb_var, map_save* last_segment)
 {
     vector<float> data_display;
     (*last_segment).clear();
@@ -156,7 +157,7 @@ void practice_action(map_final donnes_patients_synth, int i, map_save* save, vec
         string var = "var_"+to_string(j);
         float prec_value = (*save)[var][i-1];
         
-        add = test_next(donnes_patients_synth, answer, var, prec_value, current_event, last_segment);
+        add = find_next_seg(donnes_patients_synth, event, var, prec_value, current_event, last_segment);
         
         (*save)[var].push_back(add);
         data_display.push_back(add);
@@ -168,20 +169,19 @@ void practice_action(map_final donnes_patients_synth, int i, map_save* save, vec
 /*
  Function
  find place in the vector of the previous value of the scenario
- if the next value is the end of the vector return last value display
+ if the next value is the end of the vector return a random value +/- equivalent to the last value
 */
 float place(vector<float> prec_seg, float prec_value)
 {
     vector<float>::iterator it;
     for(it=prec_seg.begin(); it<prec_seg.end(); it++)
     {
-        //cout << *it << endl;
         if(*it == prec_value && it+1 < prec_seg.end())
         {
             return *(it+1);
         }
     }
-    return random_float(prec_value);
+    return random_float_in_range(prec_value);
 }
 
 // *****************************************************************************************************************************
@@ -215,7 +215,7 @@ void continue_segment(map_final donnes_patients_synthdata, int i, map_save* save
 // *****************************************************************************************************************************
 /*
  Function
- delete all actions before the last user action
+ delete all actions before the last user action and the current action from the action vector
 */
 void erase_elements(vector<proba_t>* vect_proba, int i)
 {
@@ -228,13 +228,13 @@ void erase_elements(vector<proba_t>* vect_proba, int i)
 // *****************************************************************************************************************************
 /*
  Function
- if the user's action isn't in the vector of action that mean this action isn't chronologically possible
+ if user action is not in the action vector that mean this action isn't chronologically possible
 */
-bool chronology(string answer, vector<proba_t>* vect_proba)
+bool chronology(string event, vector<proba_t>* vect_proba)
 {
     for(int i=0; i<(*vect_proba).size(); i++)
     {
-        if((*vect_proba)[i].first == answer)
+        if((*vect_proba)[i].first == event)
         {
             erase_elements(vect_proba, i);
             return true;
@@ -246,12 +246,12 @@ bool chronology(string answer, vector<proba_t>* vect_proba)
 // *****************************************************************************************************************************
 /*
  Function
- check if the user's action is chronologically possible
+ check if user action is chronologically possible
 */
-int test_chron(string answer, vector<proba_t>* vect_proba)
+int test_chron(string event, vector<proba_t>* vect_proba)
 {
     int valid;
-    if(chronology(answer, vect_proba))
+    if(chronology(event, vect_proba))
     {
         valid = 1;
     }
@@ -265,15 +265,15 @@ int test_chron(string answer, vector<proba_t>* vect_proba)
 // *****************************************************************************************************************************
 /*
  Function
- does the user's answer is a real event
+ does the user event is a real event
  return 1 if yes and 2 if no
 */
-int wich_value(string answer, map_final donnes_patients_synth, vector<proba_t>* vect_proba)
+int wich_value(string event, map_final donnes_patients_synth, vector<proba_t>* vect_proba)
 {
     int valid = 0;
-    if(donnes_patients_synth.count(answer))
+    if(donnes_patients_synth.count(event))
     {
-        valid = test_chron(answer, vect_proba);
+        valid = test_chron(event, vect_proba);
     }
     return valid;
 }
@@ -309,12 +309,12 @@ void save_in_file(map_save save, int nb_tops_total)
 // *****************************************************************************************************************************
 /*
  Main Function
- play the scenario in function of user's actions 
+ play the scenario in function of user events
 */
 void play_scenario(map_final donnes_patients_synth, int nb_obs, int nb_var, int nb_tops_total, vector<proba_t> vect_proba)
 {
     srand((unsigned int)time(0));
-    string answer;
+    string event;
     map_save save;
     vector<pair<string,int>> current_event;
     map_save last_segment;
@@ -327,18 +327,18 @@ void play_scenario(map_final donnes_patients_synth, int nb_obs, int nb_var, int 
             continue;
         }
         
-        getline(cin, answer);
+        getline(cin, event);
         
-        if(answer == "En")
+        if(event == "En")
         {
             break;
         }
         
-        int valid = wich_value(answer, donnes_patients_synth, &vect_proba);
+        int valid = wich_value(event, donnes_patients_synth, &vect_proba);
         
         switch (valid) {
             case 1:
-                practice_action(donnes_patients_synth, i, &save, &current_event, answer, nb_var, &last_segment);
+                practice_action(donnes_patients_synth, i, &save, &current_event, event, nb_var, &last_segment);
                 break;
                 
             case 2:

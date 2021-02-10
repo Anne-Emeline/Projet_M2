@@ -20,11 +20,11 @@ int main() {
     vector<proba_t> vect_proba;
     map_final donnes_patients_synth;
     
-    lire_fichier_param_gen(&nb_obs, &nb_var, &nb_actions, &tab_nb_tops, &nb_tops_total);
+    read_param_file(&nb_obs, &nb_var, &nb_actions, &tab_nb_tops, &nb_tops_total);
     
-    vect_proba = lire_fichier_proba();
+    vect_proba = read_proba();
 
-    donnes_patients_synth = read_files(nb_obs, nb_var, nb_tops_total);
+    donnes_patients_synth = generate_map(nb_obs, nb_var, nb_tops_total);
     
     play_scenario(donnes_patients_synth, nb_obs, nb_var, nb_tops_total, vect_proba);
 
